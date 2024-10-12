@@ -1294,11 +1294,6 @@ inputs:
     type:
     - boolean
     - 'null'
--   doc: List of files not added as explicit workflow inputs but required for workflow
-        execution.
-    id: in_reads
-    label: Auxiliary files
-    type: File[]?
 outputs:
 -   doc: Output directory.
     id: output_dir
