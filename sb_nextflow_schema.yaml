@@ -1302,7 +1302,6 @@ outputs:
         glob: $(inputs.outdir)
     type: Directory?
 requirements:
-requirements:
 -   class: InlineJavascriptRequirement
 -   class: InitialWorkDirRequirement
     listing:
