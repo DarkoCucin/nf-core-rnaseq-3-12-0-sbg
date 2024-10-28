@@ -1,124 +1,20 @@
 app_content:
     entrypoint: main.nf
     executor_version: 23.04.1
-arguments:
-- prefix: ''
-  shellQuote: false
-  valueFrom: "${\n    if (inputs.in_ribo_databases){\n        return \"--ribo_database_manifest rrna_manifest.txt\"\n    } else {\n        return \"\"\n    }\n}"
-- prefix: ''
-  shellQuote: false
-  valueFrom: "${\n    if (inputs.in_reference_genomes_bbsplit){\n        return \"--bbsplit_fasta_list	 reference_genomes_bbsplit.txt\"\n    } else {\n        return \"\"\n    }\n}"
-class: nextflow
 cwlVersion: None
-doc: "# ![nf-core/rnaseq](docs/images/nf-core-rnaseq_logo_light.png#gh-light-mode-only)\
-    \ ![nf-core/rnaseq](docs/images/nf-core-rnaseq_logo_dark.png#gh-dark-mode-only)\n\
-    \n[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/rnaseq/results)[![Cite\
-    \ with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.1400710-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.1400710)\n\
-    \n[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A522.10.1-23aa62.svg)](https://www.nextflow.io/)\n\
-    [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)\n\
-    [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)\n\
-    [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)\n\
-    [![Launch on Nextflow Tower](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Nextflow%20Tower-%234256e7)](https://tower.nf/launch?pipeline=https://github.com/nf-core/rnaseq)\n\
-    \n[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23rnaseq-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/rnaseq)[![Follow\
-    \ on Twitter](http://img.shields.io/badge/twitter-%40nf__core-1DA1F2?labelColor=000000&logo=twitter)](https://twitter.com/nf_core)[![Follow\
-    \ on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch\
-    \ on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)\n\
-    \n## Introduction\n\n**nf-core/rnaseq** is a bioinformatics pipeline that can\
-    \ be used to analyse RNA sequencing data obtained from organisms with a reference\
-    \ genome and annotation. It takes a samplesheet and FASTQ files as input, performs\
-    \ quality control (QC), trimming and (pseudo-)alignment, and produces a gene expression\
-    \ matrix and extensive QC report.\n\n![nf-core/rnaseq metro map](docs/images/nf-core-rnaseq_metro_map_grey.png)\n\
-    \n1. Merge re-sequenced FastQ files ([`cat`](http://www.linfo.org/cat.html))\n\
-    2. Sub-sample FastQ files and auto-infer strandedness ([`fq`](https://github.com/stjude-rust-labs/fq),\
-    \ [`Salmon`](https://combine-lab.github.io/salmon/))\n3. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))\n\
-    4. UMI extraction ([`UMI-tools`](https://github.com/CGATOxford/UMI-tools))\n5.\
-    \ Adapter and quality trimming ([`Trim Galore!`](https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/))\n\
-    6. Removal of genome contaminants ([`BBSplit`](http://seqanswers.com/forums/showthread.php?t=41288))\n\
-    7. Removal of ribosomal RNA ([`SortMeRNA`](https://github.com/biocore/sortmerna))\n\
-    8. Choice of multiple alignment and quantification routes:\n   1. [`STAR`](https://github.com/alexdobin/STAR)\
-    \ -> [`Salmon`](https://combine-lab.github.io/salmon/)\n   2. [`STAR`](https://github.com/alexdobin/STAR)\
-    \ -> [`RSEM`](https://github.com/deweylab/RSEM)\n   3. [`HiSAT2`](https://ccb.jhu.edu/software/hisat2/index.shtml)\
-    \ -> **NO QUANTIFICATION**\n9. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))\n\
-    10. UMI-based deduplication ([`UMI-tools`](https://github.com/CGATOxford/UMI-tools))\n\
-    11. Duplicate read marking ([`picard MarkDuplicates`](https://broadinstitute.github.io/picard/))\n\
-    12. Transcript assembly and quantification ([`StringTie`](https://ccb.jhu.edu/software/stringtie/))\n\
-    13. Create bigWig coverage files ([`BEDTools`](https://github.com/arq5x/bedtools2/),\
-    \ [`bedGraphToBigWig`](http://hgdownload.soe.ucsc.edu/admin/exe/))\n14. Extensive\
-    \ quality control:\n    1. [`RSeQC`](http://rseqc.sourceforge.net/)\n    2. [`Qualimap`](http://qualimap.bioinfo.cipf.es/)\n\
-    \    3. [`dupRadar`](https://bioconductor.org/packages/release/bioc/html/dupRadar.html)\n\
-    \    4. [`Preseq`](http://smithlabresearch.org/software/preseq/)\n    5. [`DESeq2`](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)\n\
-    15. Pseudo-alignment and quantification ([`Salmon`](https://combine-lab.github.io/salmon/);\
-    \ _optional_)\n16. Present QC for raw read, alignment, gene biotype, sample similarity,\
-    \ and strand-specificity checks ([`MultiQC`](http://multiqc.info/), [`R`](https://www.r-project.org/))\n\
-    \n> **Note**\n> The SRA download functionality has been removed from the pipeline\
-    \ (`>=3.2`) and ported to an independent workflow called [nf-core/fetchngs](https://nf-co.re/fetchngs).\
-    \ You can provide `--nf_core_pipeline rnaseq` when running nf-core/fetchngs to\
-    \ download and auto-create a samplesheet containing publicly available samples\
-    \ that can be accepted directly as input by this pipeline.\n\n> **Warning**\n\
-    > Quantification isn't performed if using `--aligner hisat2` due to the lack of\
-    \ an appropriate option to calculate accurate expression estimates from HISAT2\
-    \ derived genomic alignments. However, you can use this route if you have a preference\
-    \ for the alignment, QC and other types of downstream analysis compatible with\
-    \ the output of HISAT2.\n\n## Usage\n\n> **Note**\n> If you are new to Nextflow\
-    \ and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation)\
-    \ on how\n> to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)\n\
-    > with `-profile test` before running the workflow on actual data.\n\nFirst, prepare\
-    \ a samplesheet with your input data that looks as follows:\n\n**samplesheet.csv**:\n\
-    \n```csv\nsample,fastq_1,fastq_2,strandedness\nCONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,auto\n\
-    CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz,auto\n\
-    CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz,auto\n\
-    ```\n\nEach row represents a fastq file (single-end) or a pair of fastq files\
-    \ (paired end). Rows with the same sample identifier are considered technical\
-    \ replicates and merged automatically. The strandedness refers to the library\
-    \ preparation and will be automatically inferred if set to `auto`.\n\n> **Warning:**\n\
-    > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option.\
-    \ Custom config files including those\n> provided by the `-c` Nextflow option\
-    \ can be used to provide any configuration _**except for parameters**_;\n> see\
-    \ [docs](https://nf-co.re/usage/configuration#custom-configuration-files).\n\n\
-    Now, you can run the pipeline using:\n\n```bash\nnextflow run nf-core/rnaseq \\\
-    \n    --input samplesheet.csv \\\n    --outdir <OUTDIR> \\\n    --genome GRCh37\
-    \ \\\n    -profile <docker/singularity/.../institute>\n```\n\nFor more details,\
-    \ please refer to the [usage documentation](https://nf-co.re/rnaseq/usage) and\
-    \ the [parameter documentation](https://nf-co.re/rnaseq/parameters).\n\n## Pipeline\
-    \ output\n\nTo see the the results of a test run with a full size dataset refer\
-    \ to the [results](https://nf-co.re/rnaseq/results) tab on the nf-core website\
-    \ pipeline page.\nFor more details about the output files and reports, please\
-    \ refer to the\n[output documentation](https://nf-co.re/rnaseq/output).\n\n##\
-    \ Online videos\n\nA short talk about the history, current status and functionality\
-    \ on offer in this pipeline was given by Harshil Patel ([@drpatelh](https://github.com/drpatelh))\
-    \ on [8th February 2022](https://nf-co.re/events/2022/bytesize-32-nf-core-rnaseq)\
-    \ as part of the nf-core/bytesize series.\n\nYou can find numerous talks on the\
-    \ [nf-core events page](https://nf-co.re/events) from various topics including\
-    \ writing pipelines/modules in Nextflow DSL2, using nf-core tooling, running nf-core\
-    \ pipelines as well as more generic content like contributing to Github. Please\
-    \ check them out!\n\n## Credits\n\nThese scripts were originally written for use\
-    \ at the [National Genomics Infrastructure](https://ngisweden.scilifelab.se),\
-    \ part of [SciLifeLab](http://www.scilifelab.se/) in Stockholm, Sweden, by Phil\
-    \ Ewels ([@ewels](https://github.com/ewels)) and Rickard Hammar\xE9n ([@Hammarn](https://github.com/Hammarn)).\n\
-    \nThe pipeline was re-written in Nextflow DSL2 and is primarily maintained by\
-    \ Harshil Patel ([@drpatelh](https://github.com/drpatelh)) from [Seqera Labs,\
-    \ Spain](https://seqera.io/).\n\nThe pipeline workflow diagram was designed by\
-    \ Sarah Guinchard ([@G-Sarah](https://github.com/G-Sarah)) and James Fellows Yates\
-    \ ([@jfy133](https://github.com/jfy133)).\n\nMany thanks to other who have helped\
-    \ out along the way too, including (but not limited to):\n\n- [Alex Peltzer](https://github.com/apeltzer)\n\
-    - [Colin Davenport](https://github.com/colindaven)\n- [Denis Moreno](https://github.com/Galithil)\n\
-    - [Edmund Miller](https://github.com/Emiller88)\n- [Gregor Sturm](https://github.com/grst)\n\
-    - [Jacki Buros Novik](https://github.com/jburos)\n- [Lorena Pantano](https://github.com/lpantano)\n\
-    - [Matthias Zepper](https://github.com/MatthiasZepper)\n- [Maxime Garcia](https://github.com/maxulysse)\n\
-    - [Olga Botvinnik](https://github.com/olgabot)\n- [@orzechoj](https://github.com/orzechoj)\n\
-    - [Paolo Di Tommaso](https://github.com/pditommaso)\n- [Rob Syme](https://github.com/robsyme)\n\
-    \n## Contributions and Support\n\nIf you would like to contribute to this pipeline,\
-    \ please see the [contributing guidelines](.github/CONTRIBUTING.md).\n\nFor further\
-    \ information or help, don't hesitate to get in touch on the [Slack `#rnaseq`\
-    \ channel](https://nfcore.slack.com/channels/rnaseq) (you can join with [this\
-    \ invite](https://nf-co.re/join/slack)).\n\n## Citations\n\nIf you use nf-core/rnaseq\
-    \ for your analysis, please cite it using the following doi: [10.5281/zenodo.1400710](https://doi.org/10.5281/zenodo.1400710)\n\
-    \nAn extensive list of references for the tools used by the pipeline can be found\
-    \ in the [`CITATIONS.md`](CITATIONS.md) file.\n\nYou can cite the `nf-core` publication\
-    \ as follows:\n\n> **The nf-core framework for community-curated bioinformatics\
-    \ pipelines.**\n>\n> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil\
-    \ Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso\
-    \ & Sven Nahnsen.\n>\n> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).\n"
+class: nextflow
+sbg:license: "MIT"
+sbg:toolkit: "rnaseq"
+sbg:toolkitVersion: "3.12.0"
+doc: "## Introduction\n\n **rnaseq** is a bioinformatics pipeline that can be used to analyse RNA sequencing data obtained from organisms with a reference genome and annotation. This pipeline performs quality control (QC), trimming, (pseudo-)alignment, and produces a gene expression matrix and extensive QC report [1].\n\n*A list of **all inputs and parameters** with corresponding descriptions can be found at the bottom of this page.*\n\n***Please note that any cloud infrastructure costs resulting from app and pipeline executions, including the use of public apps, are the sole responsibility of you as a user. To avoid excessive costs, please read the app description carefully and set the app parameters and execution settings accordingly.***\n\n### Common Use Cases\n\n**rnaseq** pipeline, [3.12.0 release](https://github.com/nf-core/rnaseq/tree/3.12.0), is built using nextflow, and comprises the following steps:\n* Pre-processing:\n   * Merge re-sequenced FASTQ files (**[cat](https://www.linfo.org/cat.html)**);\n   * Sub-sample FASTQ files and auto-infer strandedness (**[fq](https://github.com/stjude-rust-labs/fq)**, **[Salmon](https://combine-lab.github.io/salmon/)**);\n   * Read QC (**[FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)**);\n   * UMI extraction (**[UMI-tools](https://github.com/CGATOxford/UMI-tools)**);\n   * Adapter and quality trimming (**[Trim Galore!](https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/)** by default);\n   * Removal of genome contaminants (**[BBSplit](http://seqanswers.com/forums/showthread.php?t=41288)**);\n   * Removal of ribosomal RNA (**[SortMeRNA](https://github.com/biocore/sortmerna)**);\n* Genome alignment & quantification:\n    * **[STAR](https://github.com/alexdobin/STAR)** -> **[Salmon](https://combine-lab.github.io/salmon/)** - by default\n    * **[STAR](https://github.com/alexdobin/STAR)** -> **[RSEM](https://github.com/deweylab/RSEM)**\n    * **[HiSAT2](https://ccb.jhu.edu/software/hisat2/index.shtml)** -> **NO QUANTIFICATION**\n* Pseudo-alignment and quantification (**[Salmon](https://combine-lab.github.io/salmon/)**);\n* Post-processing:\n   * Sort and index alignments (**[SAMtools](https://sourceforge.net/projects/samtools/files/samtools/)**);\n   * UMI-based deduplication (**[UMI-tools](https://github.com/CGATOxford/UMI-tools)**);\n   * Duplicate read marking (**[picard MarkDuplicates](https://broadinstitute.github.io/picard/)**);\n   * Transcript assembly and quantification (**[StringTie](https://ccb.jhu.edu/software/stringtie/)**);\n   * Create bigWig coverage files (**[BEDTools](https://github.com/arq5x/bedtools2/)**, **[bedGraphToBigWig](http://hgdownload.soe.ucsc.edu/admin/exe/)**);\n* Final QC:\n  * Extensive quality control:\n    * **[RSeQC](http://rseqc.sourceforge.net/)** \n    * **[Qualimap](http://qualimap.bioinfo.cipf.es/)**\n    * **[dupRadar](https://bioconductor.org/packages/release/bioc/html/dupRadar.html)**\n    * **[Preseq](https://github.com/smithlabcode/preseq)**\n    * **[DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)**\n  * Present QC for raw read, alignment, gene biotype, sample similarity, and strand-specificity checks (**[MultiQC](http://multiqc.info/)**, **[R](https://www.r-project.org/)**).\n\n**rnaseq** can be run with different setups. Depending on the setup different input files and parameters are required:\n* If the **Profiles**(`-profile`) parameter is set to `test` or `test_full` value there are no additional required inputs.\n* If **iGenomes reference** (`--genome`) parameter is provided the following input file is required:\n  * **Samplesheet** (`--input`) - This is the file with information about the samples you would like to analyse before running a pipeline.\n* If none of the above-mentioned parameters are used, the following input files are required:\n     * **Samplesheet** (`--input`)\n     * **Genome FASTA** (`--fasta`) - a reference genome file of an organism that will be analyzed in FASTA, FA, FASTA.GZ, FA.GZ format.\n     * Annotation file - a gene annotation file in GTF or GFF3 format (`--gtf` or `--gff`)  corresponding to the **Genome FASTA** (`--fasta`) file.\n\nThe outputs of the **rnaseq** pipeline are: \n* **Reports** - output reports that are defined in the '[towerl.yml](https://github.com/nf-core/rnaseq/blob/3.12.0/tower.yml)' file. More about this file at [nf-core/rnaseq github](https://github.com/nf-core/rnaseq/tree/3.12.0).\n* **Output directory** - a directory where **rnaseq** outputs will be saved. The pipeline generates different subdirectories depending on the selected analysis steps. For more details about the output files and reports, please refer to the [output documentation](https://nf-co.re/rnaseq/3.12.0/docs/output).\n\n\n###Changes Introduced by Seven Bridges\n\n* Parameters that are classified as **Generic options** (except `--multiqc_config`) have been omitted from the wrapper.\n* Parameters that are classified as **Institutional config options** have been omitted from the wrapper.\n* Parameters that are used to add extra arguments to the specific modules (`--extra_trimgalore_args`, `--extra_fastp_args`, `--extra_star_align_args`, `--extra_salmon_quant_args`) have been omitted from the wrapper.\n* Two additional config files are present in the workflow directory (`sbg_large_number_samples` and `sbg_full`). They can be specified by the **Profiles** (`-profile`) parameter. These configurations can be used in a following use cases:\n  * `sbg_full` - This configuration is tailored to run pipeline efficiently with the `test_full` and similar datasets. The suggested number of parallel instances is 10.\n  * `sbg_large_number_samples`  - This configuration is made to run pipeline efficiently with the larger number of samples. It is optimized with the dataset which consists of 78 paired-end samples with the average size of 4.5GB per sample. The suggested number of parallel instances is variable but it is advisable to increase this number by one on every 10th sample. \n* All string inputs referring to file path or directory path in the pipeline documentation have been modified to File or Directory inputs in the wrapper.\n* Pipeline string inputs with limited options have been modified to Enum input type. \n* Pipeline boolean inputs whose default values are `true` are modified to Enum input type.\n* **Output directory name** (`--outdir`) parameter, that specifies the name of the output **Output directory**,  is set by default to *results*.\n* By default, the workflow is set to execute in multi-instance mode. Single-instance mode is not officially supported, but can be used. Please note that app schema has to be modified for successful task executions in this mode (output directory should be set to a string and explicitly collected as an output).\n* Task logs and intermediary data can be found in the [task logs page](https://docs.sevenbridges.com/docs/view-task-logs), where each process has their coressponding logs and files.\n* Cosmetic changes were made to input labels and doc strings.\n\n\n###Common Issues and Important Notes\n\n* In order to run the workflow, it is required to create a comma-separated samplesheet file containing sample information that will be analysed. For more information on how to prepare samplesheet for **rnaseq**, please consult their [documentation](https://nf-co.re/rnaseq/3.12.0/docs/usage/#samplesheet-input).\n* To analyse files located in the platform project, their project paths need to be added to the samplesheet. This can be done using **sbpack** command line tool ([sbpack installation guideline](https://docs.sevenbridges.com/docs/bring-nextflow-apps-to-the-platform#about-sbpack)). **sbmanifest** command can remap file paths contained within a manifest file to platform file locations. For example, to remap a samplesheet with two file columns, named fastq_1 and fastq_2, and upload it to the platform with the tag \"SampleSheet\", following command can be used:\n```\nsbmanifest --projectid user/project_id --sample-sheet /path/to/rnaseq_samplesheet.csv --columns fastq_1 fastq_2 -o rnaseq_samplesheet.csv -u --tags SampleSheet\n```\n* Files provided in the **Samplesheet** (`--input`) file must be processed with reference files obtained from the same organism.\n* Alongside the **Samplesheet** (`--input`) file , both the **BBSplit reference genomes list** (`--bbsplit_fasta_list`) and the **rRNA databases manifest** (`--ribo_database_manifest`) must also be generated using the `sbmanifest` command as described above.\n* Use **Save reference** (`--save_reference`) parameter to save additional reference files and indices needed for pipeline execution. These files can be used for future pipeline runs with data obtained from the same organism, significantly reducing processing time.\n* Specifying parameters through the **Parameters file** (`-params-file`) can save time in case of using the same pipeline settings for multiple runs. The example of this file can be found at [nf-core pipeline configuration documentation](https://nf-co.re/docs/usage/configuration#custom-configuration-files).\n* All parameters that have been omitted from the wrapper can be provided through **Parameters file** (`-params-file`) input.\n* **HISAT2 Build** requires significantly more memory (~ 200GB for human reference) when using splice sites and exons information. If a larger genome is used, consider supplying more memory to the **HISAT2_BUILD** process through the **HISAT2 Build memory** (`--hisat2_build_memory`) parameter.\n\n###Limitations\n\n- If a larger number of read files is provided in the **Samplesheet** (`--input`) file, the Euclidean distance plot produced by **DESEQ2_QC_STAR_SALMON**, **DESEQ2_QC_SALMON** and **DESEQ2_QC_RSEM**  will have overlapping labels for sample names on the X and Y axis. \n- The HTML report that is produced by **QUALIMAP_RNASEQ** does not contain any pictures related to this tool. This is the result of the failed connection between the qualimap server and Velsera Seven Bridges platform.\n- The following pipeline’s parameters and input files are not tested: **UMI barcode pattern in read 2** (`--umitols_bc2_pattern`), **UMI separator** (`--umitols_umi_separator`), and **MultiQC config file** (`--multiqc_config`).\n\n###Performance benchmarking \n\nBenchmarking was performed on the dataset specified by the `test_full` option and on human RNA seq dataset of 78 paired-end samples ( Bio Project [PRJNA542148](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA542148)). Human reference files obtained from the latest Ensembl release ([release 110](https://www.ensembl.org/Homo_sapiens/Info/Index)) were used as reference for the second dataset. **STAR** was used as the alignment algorithm and **Salmon** as the quantification tool. The task duration and cost greatly depend on the size and number of read files specified in the **Samplesheet**(`--input`) file. All tasks were run on on-demand AWS instances. The results of the benchmarking are presented in the following table: \n\n| Experiment type | Dataset used |  Reads size | Duration |  Cost - Instance + Disk | Maximum number of parallel instances | Profiles config | \n|:---------------:|:-----------:|:----------:|:--------:|:-----:|:----------:|:----------:|:----------:|\n|     RNA-Seq     | nf-core test full profile     |  16 x ~ 7.72 GB  |   8h 3min  | $ 45.94 + $ 9.53 | 10 | base |\n|     RNA-Seq     | nf-core test full profile    |  16 x ~ 7.72 GB   |   7h 6min   | $ 30.96 + $ 3.64  | 10 | sbg_full |\n|     RNA-Seq     | PRJNA542148    |  156 x ~ 2.1 GB  |    17h 5min   | $ 188.12 + $ 42.61  | 10 | base |\n|     RNA-Seq     | PRJNA542148    |  156 x ~ 2.1 GB  |    10h 1min   | $ 120.54 + $ 5.74  | 10 | sbg_large_number_samples |\n\n\n*Cost can be significantly reduced by using **spot instances**. Visit the [knowledge center](https://docs.sevenbridges.com/docs/about-spot-instances) for more details.*\n\n###References\n\n[1] [nf-core/rnaseq documentation](https://nf-co.re/rnaseq/3.12.0/)\n\n[2] [nf-core/rnaseq](https://zenodo.org/records/7998767)"
+label: rnaseq
+sbg:links:
+  - id: 'https://nf-co.re/rnaseq/3.12.0'
+    label: Homepage
+  - id: 'https://github.com/nf-core/rnaseq/tree/3.12.0'
+    label: Source Code
+  - id: 'https://nf-co.re/rnaseq/3.12.0/docs/usage/'
+    label: Documentation
 inputs:
 -   doc: Select which profile(s) you want to use for task execution.
     id: profile
@@ -127,1187 +23,993 @@ inputs:
         prefix: -profile
         shellQuote: false
     label: Profiles
+    sbg:toolDefaultValue: None
     type:
     - 'null'
     -   items:
             name: profile
             symbols:
-            - apptainer
-            - arm
-            - charliecloud
-            - conda
             - debug
             - docker
-            - gitpod
-            - mamba
-            - podman
-            - public_aws_ecr
             - sbg_full
             - sbg_large_number_samples
-            - shifter
-            - singularity
             - test
             - test_cache
             - test_full
-            - test_full_aws
-            - test_full_azure
-            - test_full_gcp
             type: enum
         type: array
--   doc: You will need to create a design file with information about the samples
-        in your experiment before running the pipeline. Use this parameter to specify
-        its location. It has to be a comma-separated file with 4 columns, and a header
-        row. See [usage docs](https://nf-co.re/rnaseq/usage#samplesheet-input).
-    format: text/csv
-    id: input
-    inputBinding:
-        prefix: --input
-    label: Path to comma-separated file containing information about the samples in
-        the experiment.
-    sbg:category: Input/output options
-    sbg:icon: fas fa-file-csv
-    sbg:pattern: ^\S+\.csv$
-    type:
-    - File
-    - 'null'
--   id: outdir
-    inputBinding:
-        prefix: --outdir
-    label: The output directory where the results will be saved. You have to use absolute
-        paths to storage on Cloud infrastructure.
-    sbg:category: Input/output options
-    sbg:icon: fas fa-folder-open
-    type:
-    - string
-    - 'null'
--   doc: Set this parameter to your e-mail address to get a summary e-mail with details
-        of the run sent to you when the workflow exits. If set in your user config
-        file (`~/.nextflow/config`) then you don't need to specify this on the command
-        line for every run.
-    id: email
-    inputBinding:
-        prefix: --email
-    label: Email address for completion summary.
-    sbg:category: Input/output options
-    sbg:icon: fas fa-envelope
-    sbg:pattern: ^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$
-    type:
-    - string
-    - 'null'
--   id: multiqc_title
-    inputBinding:
-        prefix: --multiqc_title
-    label: MultiQC report title. Printed as page header, used for filename if not
-        otherwise specified.
-    sbg:category: Input/output options
-    sbg:icon: fas fa-file-signature
-    type:
-    - string
-    - 'null'
--   id: save_merged_fastq
-    inputBinding:
-        prefix: --save_merged_fastq
-    label: Save FastQ files after merging re-sequenced libraries in the results directory.
-    sbg:category: Input/output options
-    sbg:icon: fas fa-save
-    type:
-    - boolean
-    - 'null'
--   id: with_umi
-    inputBinding:
-        prefix: --with_umi
-    label: Enable UMI-based read deduplication.
-    sbg:category: UMI options
-    sbg:icon: fas fa-barcode
-    type:
-    - boolean
-    - 'null'
--   doc: 'More details can be found in the [UMI-tools documentation](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#extract-method).
+- doc: A comma-separated file with a header row containing information about the samples
+    in the experiment. sample,fastq_1,fastq_2,strandedness must be the first 4 columns
+    of the samplesheet file. More information can be found in the https://nf-co.re/rnaseq/usage#samplesheet-input.
+  id: input
+  inputBinding:
+    prefix: --input
+  label: Samplesheet
+  sbg:fileTypes: CSV
+  type:
+  - File
+  - 'null' 
+- default: results 
+  doc: Name of the output directory where the results will be saved.
+  id: outdir
+  inputBinding:
+    prefix: --outdir
+  label: Output directory name
+  sbg:toolDefaultValue: results
+  type:
+  - string
+  - 'null'
+- doc: MultiQC report title. Printed as page header, used for filename if not otherwise
+    specified.
+  id: multiqc_title
+  inputBinding:
+    prefix: --multiqc_title
+  label: MultiQC report title
+  sbg:toolDefaultValue: None
+  type:
+  - string
+  - 'null'
+- doc: Save FASTQ files after merging re-sequenced libraries in the results directory.
+  id: save_merged_fastq
+  inputBinding:
+    prefix: --save_merged_fastq
+  label: Save merged FASTQ files
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Enable UMI-based read deduplication.
+  id: with_umi
+  inputBinding:
+    prefix: --with_umi
+  label: UMI-based read deduplication
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: UMI pattern to use. Can be either ''string'' or ''regex''. More
+    details can be found in the https://umi-tools.readthedocs.io/en/latest/reference/extract.html#extract-method.
+  id: umitools_extract_method
+  inputBinding:
+    prefix: --umitools_extract_method
+  label: UMI pattern
+  sbg:toolDefaultValue: string
+  type:
+  -   name: umi_pattern
+      symbols:
+      - string
+      - regex
+      type: enum
+  - 'null'
+- doc: Custom config file to supply to MultiQC.
+  id: in_multiqc_config
+  inputBinding:
+    prefix: --multiqc_config
+  label: MultiQC config file
+  type:
+  - File
+  - 'null'
+- doc: Skip the UMI extraction from the read in case the UMIs have been moved to
+    the headers in advance of the pipeline run.
+  id: skip_umi_extract
+  inputBinding:
+    prefix: --skip_umi_extract
+  label: Skip the UMI extraction
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: The UMI barcode pattern to use e.g. 'NNNNNN' indicates that the first 6 nucleotides
+    of the read are from the UMI. More details can be found in the https://umi-tools.readthedocs.io/en/latest/reference/extract.html#extract-method.
+  id: umitools_bc_pattern
+  inputBinding:
+    prefix: --umitools_bc_pattern
+  label: UMI barcode pattern
+  sbg:toolDefaultValue: None
+  type:
+  - string
+  - 'null'
+- doc: The UMI barcode pattern to use if the UMI is located in read 2.
+  id: umitools_bc_pattern2
+  inputBinding:
+    prefix: --umitools_bc_pattern2
+  label: UMI barcode pattern in read 2
+  sbg:toolDefaultValue: None
+  type:
+  - string
+  - 'null'
+- doc: After UMI barcode extraction discard either R1 or R2 by setting this parameter
+    to 1 or 2, respectively.
+  id: umi_discard_read
+  inputBinding:
+    prefix: --umi_discard_read
+  label: UMI discard read
+  sbg:toolDefaultValue: None
+  type:
+  -  name: UMI_discard_read
+     symbols:
+     - '1'
+     - '2'
+     type: enum
+  - 'null'
+- doc: The character that separates the UMI in the read name. Most likely a colon
+    if the extraction with UMI-tools is skipped and other software is used.
+  id: umitools_umi_separator
+  inputBinding:
+    prefix: --umitools_umi_separator
+  label: UMI separator
+  sbg:toolDefaultValue: None
+  type:
+  - string
+  - 'null'
+- doc: Method to use to determine read groups by subsuming those with similar UMIs.
+    All methods start by identifying the reads with the same mapping position, but
+    treat similar yet nonidentical UMIs differently.
+  id: umitools_grouping_method
+  inputBinding:
+    prefix: --umitools_grouping_method
+  label: UMI grouping method
+  sbg:toolDefaultValue: directional
+  type:
+  -   name: UMI_grouping_method
+      symbols:
+      - directional
+      - adjacency
+      - cluster
+      - percentile
+      - unique
+      type: enum
+  - 'null'
+- doc: Generate output stats when running "umi_tools dedup". It can be quite time
+    consuming generating these output stats - see https://github.com/nf-core/rnaseq/issues/827.
+  id: umitools_dedup_stats
+  inputBinding:
+    prefix: --umitools_dedup_stats
+  label: UMI-tools dedup stats
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: If this option is specified, intermediate FASTQ and BAM files produced by UMI-tools
+    are also saved in the results directory.
+  id: save_umi_intermeds
+  inputBinding:
+    prefix: --save_umi_intermeds
+  label: Save UMI intermeds
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: "A comma-separated file containing a list of reference genomes to filter reads\
+    \ against with BBSplit. `--skip_bbsplit false` has to be explicitly set\
+    \ if BBSplit will be used. The file should contain 2 columns: short name and\
+    \ full path to reference genome(s) e.g. \n```\nmm10,/path/to/mm10.fa\necoli,/path/to/ecoli.fa\n\
+    ```"
+  id: in_bbsplit_fasta_list
+  inputBinding:
+    prefix: --bbsplit_fasta_list
+  label: BBSplit reference genomes list
+  sbg:fileTypes: CSV, TXT
+  type:
+  - File
+  - 'null'
+- doc: TAR.GZ archive for pre-built BBSplit index. The BBSplit index will have to
+    be built at least once with this pipeline (see `--save_reference` to save index).
+    It can then be provided via `--bbsplit_index` for future runs.
+  id: in_bbsplit_index_archive
+  inputBinding:
+    prefix: --bbsplit_index
+  label: BBSplit index archive
+  sbg:fileTypes: TAR.GZ
+  type:
+  - File
+  - 'null'
+- doc: Directory for pre-built BBSplit index. The BBSplit index will have to
+    be built at least once with this pipeline (see `--save_reference` to save index).
+    It can then be provided via `--bbsplit_index` for future runs.
+  id: in_bbsplit_index_directory
+  inputBinding:
+    prefix: --bbsplit_index
+  label: BBSplit index directory
+  type:
+  - Directory
+  - 'null'
+- doc: If this option is specified, FASTQ files split by reference will be saved in
+    the results directory.
+  id: save_bbsplit_reads
+  inputBinding:
+    prefix: --save_bbsplit_reads
+  label: Save BBSplit reads
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Skip BBSplit for removal of non-reference genome reads.
+  id: skip_bbsplit
+  inputBinding:
+    prefix: --skip_bbsplit
+  label: Skip BBSplit
+  sbg:toolDefaultValue: True
+  type:
+  -   name: skip_bbsplit
+      symbols:
+      - true
+      - false
+      type: enum
+  - 'null'
+- doc: Enable the removal of reads derived from ribosomal RNA using SortMeRNA. Any
+    patterns found in the sequences defined by the '--ribo_database_manifest' parameter
+    will be used.
+  id: remove_ribo_rna
+  inputBinding:
+    prefix: --remove_ribo_rna
+  label: Remove rRNA
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Text file containing paths to FASTA files (one per line) that will be used
+    to create the database for SortMeRNA. By default https://github.com/biocore/sortmerna/tree/master/data/rRNA_databases
+    defined in the SortMeRNA GitHub repo are used. An example of this file can be found on the
+    Github repository in `assets/rrna-default-dbs.txt`.
 
-        '
-    id: umitools_extract_method
-    inputBinding:
-        prefix: --umitools_extract_method
-    label: UMI pattern to use. Can be either 'string' (default) or 'regex'.
-    sbg:category: UMI options
-    sbg:icon: fas fa-barcode
-    sbg:toolDefaultValue: string
-    type:
-    - string
-    - 'null'
--   id: skip_umi_extract
-    inputBinding:
-        prefix: --skip_umi_extract
-    label: Skip the UMI extraction from the read in case the UMIs have been moved
-        to the headers in advance of the pipeline run.
-    sbg:category: UMI options
-    sbg:icon: fas fa-compress-alt
-    type:
-    - boolean
-    - 'null'
--   doc: More details can be found in the [UMI-tools documentation](https://umi-tools.readthedocs.io/en/latest/reference/extract.html#extract-method).
-    id: umitools_bc_pattern
-    inputBinding:
-        prefix: --umitools_bc_pattern
-    label: The UMI barcode pattern to use e.g. 'NNNNNN' indicates that the first 6
-        nucleotides of the read are from the UMI.
-    sbg:category: UMI options
-    sbg:icon: fas fa-barcode
-    type:
-    - string
-    - 'null'
--   id: umitools_bc_pattern2
-    inputBinding:
-        prefix: --umitools_bc_pattern2
-    label: The UMI barcode pattern to use if the UMI is located in read 2.
-    sbg:category: UMI options
-    sbg:icon: fas fa-barcode
-    type:
-    - string
-    - 'null'
--   id: umi_discard_read
-    inputBinding:
-        prefix: --umi_discard_read
-    label: After UMI barcode extraction discard either R1 or R2 by setting this parameter
-        to 1 or 2, respectively.
-    sbg:category: UMI options
-    sbg:icon: fas fa-barcode
-    type:
-    - int
-    - 'null'
--   id: umitools_umi_separator
-    inputBinding:
-        prefix: --umitools_umi_separator
-    label: The character that separates the UMI in the read name. Most likely a colon
-        if you skipped the extraction with UMI-tools and used other software.
-    sbg:category: UMI options
-    sbg:icon: fas fa-star-half-alt
-    type:
-    - string
-    - 'null'
--   id: umitools_grouping_method
-    inputBinding:
-        prefix: --umitools_grouping_method
-    label: Method to use to determine read groups by subsuming those with similar
-        UMIs. All methods start by identifying the reads with the same mapping position,
-        but treat similar yet nonidentical UMIs differently.
-    sbg:category: UMI options
-    sbg:icon: far fa-object-ungroup
-    sbg:toolDefaultValue: directional
-    type:
-    -   name: umitools_grouping_method
-        symbols:
-        - unique
-        - percentile
-        - cluster
-        - adjacency
-        - directional
-        type: enum
-    - 'null'
--   doc: It can be quite time consuming generating these output stats - see [#827](https://github.com/nf-core/rnaseq/issues/827).
-    id: umitools_dedup_stats
-    inputBinding:
-        prefix: --umitools_dedup_stats
-    label: Generate output stats when running "umi_tools dedup".
-    sbg:category: UMI options
-    sbg:icon: fas fa-barcode
-    type:
-    - boolean
-    - 'null'
--   id: save_umi_intermeds
-    inputBinding:
-        prefix: --save_umi_intermeds
-    label: If this option is specified, intermediate FastQ and BAM files produced
-        by UMI-tools are also saved in the results directory.
-    sbg:category: UMI options
-    sbg:icon: fas fa-save
-    type:
-    - boolean
-    - 'null'
--   doc: "The file should contain 2 columns: short name and full path to reference\
-        \ genome(s) e.g. \n```\nmm10,/path/to/mm10.fa\necoli,/path/to/ecoli.fa\n```"
-    id: bbsplit_fasta_list
-    inputBinding:
-        prefix: --bbsplit_fasta_list
-    label: Path to comma-separated file containing a list of reference genomes to
-        filter reads against with BBSplit. You have to also explicitly set `--skip_bbsplit
-        false` if you want to use BBSplit.
-    sbg:category: Read filtering options
-    sbg:icon: fas fa-list-alt
-    type:
-    - string
-    - 'null'
--   doc: The BBSplit index will have to be built at least once with this pipeline
-        (see `--save_reference` to save index). It can then be provided via `--bbsplit_index`
-        for future runs.
-    id: bbsplit_index
-    inputBinding:
-        prefix: --bbsplit_index
-    label: Path to directory or tar.gz archive for pre-built BBSplit index.
-    sbg:category: Read filtering options
-    sbg:icon: fas fa-bezier-curve
-    type:
-    - string
-    - 'null'
--   id: save_bbsplit_reads
-    inputBinding:
-        prefix: --save_bbsplit_reads
-    label: If this option is specified, FastQ files split by reference will be saved
-        in the results directory.
-    sbg:category: Read filtering options
-    sbg:icon: fas fa-save
-    type:
-    - boolean
-    - 'null'
--   id: skip_bbsplit
-    inputBinding:
-        prefix: --skip_bbsplit
-    label: Skip BBSplit for removal of non-reference genome reads.
-    sbg:category: Read filtering options
-    sbg:icon: fas fa-fast-forward
-    sbg:toolDefaultValue: true
-    type:
-    - boolean
-    - 'null'
--   doc: Any patterns found in the sequences defined by the '--ribo_database_manifest'
-        parameter will be used.
-    id: remove_ribo_rna
-    inputBinding:
-        prefix: --remove_ribo_rna
-    label: Enable the removal of reads derived from ribosomal RNA using SortMeRNA.
-    sbg:category: Read filtering options
-    sbg:icon: fas fa-trash-alt
-    type:
-    - boolean
-    - 'null'
--   doc: 'By default, [rRNA databases](https://github.com/biocore/sortmerna/tree/master/data/rRNA_databases)
-        defined in the SortMeRNA GitHub repo are used. You can see an example in the
-        pipeline Github repository in `assets/rrna-default-dbs.txt`.
-
-        Please note that commercial/non-academic entities require [`licensing for
-        SILVA`](https://www.arb-silva.de/silva-license-information) for these default
-        databases.'
-    id: ribo_database_manifest
-    inputBinding:
-        prefix: --ribo_database_manifest
-    label: Text file containing paths to fasta files (one per line) that will be used
-        to create the database for SortMeRNA.
-    sbg:category: Read filtering options
-    sbg:icon: fas fa-database
-    sbg:toolDefaultValue: ${projectDir}/assets/rrna-db-defaults.txt
-    type:
-    - string
-    - 'null'
--   id: save_non_ribo_reads
-    inputBinding:
-        prefix: --save_non_ribo_reads
-    label: If this option is specified, intermediate FastQ files containing non-rRNA
-        reads will be saved in the results directory.
-    sbg:category: Read filtering options
-    sbg:icon: fas fa-save
-    type:
-    - boolean
-    - 'null'
--   doc: "If using a reference genome configured in the pipeline using iGenomes, use\
+    Please note that commercial/non-academic entities require https://www.arb-silva.de/silva-license-information
+    for these default databases.
+  id: in_ribo_database_manifest
+  inputBinding:
+    prefix: --ribo_database_manifest
+  label: rRNA databases manifest
+  sbg:toolDefaultValue: ${projectDir}/assets/rrna-db-defaults.txt
+  sbg:fileTypes: TXT
+  type:
+  - File
+  - 'null'
+- doc: If this option is specified, intermediate FASTQ files containing non-rRNA reads
+    will be saved in the results directory.
+  id: save_non_ribo_reads
+  inputBinding:
+    prefix: --save_non_ribo_reads
+  label: Save non-rRNA reads
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: "If using a reference genome configured in the pipeline using iGenomes, use\
         \ this parameter to give the ID for the reference. This is then used to build\
         \ the full paths for all required reference genome files e.g. `--genome GRCh38`.\
         \ \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes)\
         \ for more details."
-    id: genome
-    inputBinding:
-        prefix: --genome
-    label: Name of iGenomes reference.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-book
-    type:
-    - string
-    - 'null'
--   doc: This parameter is *mandatory* if `--genome` is not specified. If you don't
-        have the appropriate alignment index available this will be generated for
-        you automatically. Combine with `--save_reference` to save alignment index
-        for future runs.
-    format: text/plain
-    id: fasta
-    inputBinding:
-        prefix: --fasta
-    label: Path to FASTA genome file.
-    sbg:category: Reference genome options
-    sbg:icon: far fa-file-code
-    sbg:pattern: ^\S+\.fn?a(sta)?(\.gz)?$
-    type:
-    - File
-    - 'null'
--   doc: This parameter is *mandatory* if `--genome` is not specified.
-    format: text/plain
-    id: gtf
-    inputBinding:
-        prefix: --gtf
-    label: Path to GTF annotation file.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-code-branch
-    sbg:pattern: ^\S+\.gtf(\.gz)?$
-    type:
-    - File
-    - 'null'
--   doc: This parameter must be specified if `--genome` or `--gtf` are not specified.
-    format: text/plain
-    id: gff
-    inputBinding:
-        prefix: --gff
-    label: Path to GFF3 annotation file.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-code-branch
-    sbg:pattern: ^\S+\.gff(\.gz)?$
-    type:
-    - File
-    - 'null'
--   format: text/plain
-    id: gene_bed
-    inputBinding:
-        prefix: --gene_bed
-    label: Path to BED file containing gene intervals. This will be created from the
-        GTF file if not specified.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-procedures
-    sbg:pattern: ^\S+\.bed(\.gz)?$
-    type:
-    - File
-    - 'null'
--   format: text/plain
-    id: transcript_fasta
-    inputBinding:
-        prefix: --transcript_fasta
-    label: Path to FASTA transcriptome file.
-    sbg:category: Reference genome options
-    sbg:icon: far fa-file-code
-    sbg:pattern: ^\S+\.fn?a(sta)?(\.gz)?$
-    type:
-    - File
-    - 'null'
--   doc: If provided, the sequences in this file will get concatenated to the existing
-        genome FASTA file, a GTF file will be automatically created using the entire
-        sequence as the gene, transcript, and exon features, and any alignment index
-        will get created from the combined FASTA and GTF. It is recommended to save
-        the reference with `--save_reference` to re-use the index for future runs
-        so you do not need to create it again.
-    format: text/plain
-    id: additional_fasta
-    inputBinding:
-        prefix: --additional_fasta
-    label: FASTA file to concatenate to genome FASTA file e.g. containing spike-in
-        sequences.
-    sbg:category: Reference genome options
-    sbg:icon: far fa-file-code
-    sbg:pattern: ^\S+\.fn?a(sta)?(\.gz)?$
-    type:
-    - File
-    - 'null'
--   format: text/plain
-    id: splicesites
-    inputBinding:
-        prefix: --splicesites
-    label: Splice sites file required for HISAT2.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-hand-scissors
-    type:
-    - File
-    - 'null'
--   id: star_index
-    inputBinding:
-        prefix: --star_index
-    label: Path to directory or tar.gz archive for pre-built STAR index.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-bezier-curve
-    type:
-    - File
-    - 'null'
--   id: hisat2_index
-    inputBinding:
-        prefix: --hisat2_index
-    label: Path to directory or tar.gz archive for pre-built HISAT2 index.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-bezier-curve
-    type:
-    - File
-    - 'null'
--   id: rsem_index
-    inputBinding:
-        prefix: --rsem_index
-    label: Path to directory or tar.gz archive for pre-built RSEM index.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-bezier-curve
-    type:
-    - File
-    - 'null'
--   id: salmon_index
-    inputBinding:
-        prefix: --salmon_index
-    label: Path to directory or tar.gz archive for pre-built Salmon index.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-bezier-curve
-    type:
-    - File
-    - 'null'
--   doc: HiSAT2 requires a huge amount of RAM to build a genome index for larger genomes,
-        if including splice sites and exons e.g. the human genome might typically
-        require 200GB. If you specify less than this threshold for the `HISAT2_BUILD`
-        process then the splice sites and exons will be ignored, meaning that the
-        process will require a lot less memory. If you are working with a small genome,
-        set this parameter to a lower value to reduce the threshold for skipping this
-        check. If using a larger genome, consider supplying more memory to the `HISAT2_BUILD`
-        process.
-    id: hisat2_build_memory
-    inputBinding:
-        prefix: --hisat2_build_memory
-    label: Minimum memory required to use splice sites and exons in the HiSAT2 index
-        build process.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-memory
-    sbg:pattern: ^\d+(\.\d+)?\.?\s*(K|M|G|T)?B$
-    sbg:toolDefaultValue: 200.GB
-    type:
-    - string
-    - 'null'
--   doc: If your GTF file is in GENCODE format and you would like to run Salmon i.e.
-        `--pseudo_aligner salmon`, you will need to provide this parameter in order
-        to build the Salmon index appropriately.
-    id: gencode
-    inputBinding:
-        prefix: --gencode
-    label: Specify if your GTF annotation is in GENCODE format.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-code-branch
-    type:
-    - boolean
-    - 'null'
--   doc: 'This behaviour can be modified by specifying `--gtf_extra_attributes` when
-        running the pipeline. Note that you can also specify more than one desired
-        value, separated by a comma e.g. `--gtf_extra_attributes gene_id,...`.
-
-        '
-    id: gtf_extra_attributes
-    inputBinding:
-        prefix: --gtf_extra_attributes
-    label: By default, the pipeline uses the `gene_name` field to obtain additional
-        gene identifiers from the input GTF file when running Salmon.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-plus-square
-    sbg:toolDefaultValue: gene_name
-    type:
-    - string
-    - 'null'
--   id: gtf_group_features
-    inputBinding:
-        prefix: --gtf_group_features
-    label: Define the attribute type used to group features in the GTF file when running
-        Salmon.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-layer-group
-    sbg:toolDefaultValue: gene_id
-    type:
-    - string
-    - 'null'
--   id: featurecounts_group_type
-    inputBinding:
-        prefix: --featurecounts_group_type
-    label: The attribute type used to group feature types in the GTF file when generating
-        the biotype plot with featureCounts.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-layer-group
-    sbg:toolDefaultValue: gene_biotype
-    type:
-    - string
-    - 'null'
--   doc: The feature type used from the GTF file when generating the biotype plot
-        with featureCounts.
-    id: featurecounts_feature_type
-    inputBinding:
-        prefix: --featurecounts_feature_type
-    label: By default, the pipeline assigns reads based on the 'exon' attribute within
-        the GTF file.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-indent
-    sbg:toolDefaultValue: exon
-    type:
-    - string
-    - 'null'
--   doc: If an alignment index is generated by the pipeline use this parameter to
-        save it to your results folder. These can then be used for future pipeline
-        runs, reducing processing times.
-    id: save_reference
-    inputBinding:
-        prefix: --save_reference
-    label: If generated by the pipeline save the STAR index in the results directory.
-    sbg:category: Reference genome options
-    sbg:icon: fas fa-save
-    type:
-    - boolean
-    - 'null'
--   id: igenomes_base
-    inputBinding:
-        prefix: --igenomes_base
-    label: Directory / URL base for iGenomes references.
-    sbg:category: Reference genome options
-    sbg:hidden: true
-    sbg:icon: fas fa-cloud-download-alt
-    sbg:toolDefaultValue: s3://ngi-igenomes/igenomes
-    type:
-    - Directory
-    - 'null'
--   doc: Do not load `igenomes.config` when running the pipeline. You may choose this
+  id: genome
+  inputBinding:
+    prefix: --genome
+  label: iGenomes reference
+  sbg:toolDefaultValue: None
+  sbg:category: Reference genome options
+  sbg:icon: fas fa-book
+  type:
+  - string
+  - 'null'
+- doc: Genome FASTA file. If the appropriate alignment index is not available this will be generated 
+    automatically. Combine with `--save_reference` to save alignment index for future
+    runs.
+  id: in_fasta
+  inputBinding:
+    prefix: --fasta
+  label: Genome FASTA
+  sbg:fileTypes: FASTA, FA, FASTA.GZ, FA.GZ
+  secondaryFiles:
+  - pattern: .fai
+    required: false
+  type:
+  - File
+  - 'null'
+- doc: GTF annotation file. This file is mandatory if `--gff` is not specified.
+  id: in_gtf
+  inputBinding:
+    prefix: --gtf
+  label: GTF annotation file
+  sbg:fileTypes: GTF, GTF.GZ
+  type:
+  - File
+  - 'null'
+- doc: GFF3 annotation file. This file must be specified if `--gtf` is not specified.
+  id: in_gff
+  inputBinding:
+    prefix: --gff
+  label: GFF3 annotation file
+  sbg:fileTypes: GFF, GFF.GZ
+  type:
+  - File
+  - 'null'
+- doc: BED file containing gene intervals. This will be created from the GTF file
+    if not specified.
+  id: in_gene_bed
+  inputBinding:
+    prefix: --gene_bed
+  label: Gene intervals
+  sbg:fileTypes: BED
+  type:
+  - File
+  - 'null'
+- doc: Transcriptome FASTA file.
+  id: in_transcript_fasta
+  inputBinding:
+    prefix: --transcript_fasta
+  label: Transcriptome FASTA
+  sbg:fileTypes: FASTA, FA, FASTA.GZ, FA.GZ
+  type:
+  - File
+  - 'null'
+- doc: FASTA file to concatenate to genome FASTA file e.g. containing spike-in sequences.
+    If provided, the sequences in this file will get concatenated to the existing
+    genome FASTA file, a GTF file will be automatically created using the entire sequence
+    as the gene, transcript, and exon features, and any alignment index will get created
+    from the combined FASTA and GTF. It is recommended to save the reference with
+    `--save_reference` to re-use the index for future runs so there is no need to create
+    it again.
+  id: in_additional_fasta
+  inputBinding:
+    prefix: --additional_fasta
+  label: Additional FASTA
+  sbg:fileTypes: FASTA, FA, FASTA.GZ, FA.GZ
+  type:
+  - File
+  - 'null'
+- doc: Splice sites file required for HISAT2.
+  id: in_splicesites
+  inputBinding:
+    prefix: --splicesites
+  label: Splice sites file
+  sbg:fileTypes: TXT
+  type:
+  - File
+  - 'null'
+- doc: TAR.GZ archive for pre-built STAR index.
+  id: in_star_index_archive
+  inputBinding:
+    prefix: --star_index
+  label: STAR index archive
+  sbg:fileTypes: TAR.GZ
+  type:
+  - File
+  - 'null'
+- doc: Directory for pre-built STAR index.
+  id: in_star_index_directory
+  inputBinding:
+    prefix: --star_index
+  label: STAR index directory
+  type:
+  - Directory
+  - 'null'
+- doc: TAR.GZ archive for pre-built HISAT2 index.
+  id: in_hisat2_index_archive
+  inputBinding:
+    prefix: --hisat2_index
+  label: HISAT2 index archive
+  sbg:fileTypes: TAR.GZ
+  type:
+  - File
+  - 'null'
+- doc: Directory for pre-built HISAT2 index.
+  id: in_hisat2_index_directory
+  inputBinding:
+    prefix: --hisat2_index
+  label: HISAT2 index directory
+  type:
+  - Directory
+  - 'null'
+- doc: TAR.GZ archive for pre-built RSEM index.
+  id: in_rsem_index_archive
+  inputBinding:
+    prefix: --rsem_index
+  label: RSEM index archive
+  sbg:fileTypes: TAR.GZ
+  type:
+  - File
+  - 'null'
+- doc: Directory for pre-built RSEM index.
+  id: in_rsem_index_directory
+  inputBinding:
+    prefix: --rsem_index
+  label: RSEM index directory
+  type:
+  - Directory
+  - 'null'
+- doc: TAR.GZ archive for pre-built Salmon index.
+  id: in_salmon_index_archive
+  inputBinding:
+    prefix: --salmon_index
+  label: Salmon index archive
+  sbg:fileTypes: TAR.GZ
+  type:
+  - File
+  - 'null'
+- doc: Directory for pre-built Salmon index.
+  id: in_salmon_index_directory
+  inputBinding:
+    prefix: --salmon_index
+  label: Salmon index directory
+  type:
+  - Directory
+  - 'null'
+- doc: A nextflow-specific parameters file to define pipeline settings that can be used across multiple runs.
+  id: in_params_file
+  inputBinding:
+    prefix: -params-file
+  label: Parameters file
+  sbg:fileTypes: YAML, YML, JSON
+  type:
+  - File
+  - 'null'
+- doc: Minimum memory required to use splice sites and exons in the HiSAT2 index build
+    process. HiSAT2 requires a huge amount of RAM to build a genome index for larger
+    genomes, if including splice sites and exons e.g. the human genome might typically
+    require 200GB. If less than this threshold is specified for the `HISAT2_BUILD`
+    process then the splice sites and exons will be ignored, meaning that the process
+    will require a lot less memory. If small genomes are analysed, this 
+    parameter should be set to a lower value to reduce the threshold for skipping this check. If
+    using a larger genome, consider supplying more memory to the `HISAT2_BUILD` process.
+  id: hisat2_build_memory
+  inputBinding:
+    prefix: --hisat2_build_memory
+  label: HISAT2 Build memory
+  sbg:toolDefaultValue: 200.GB
+  type:
+  - string
+  - 'null'
+- doc: Specify if GTF annotation is in GENCODE format. If GTF file is in
+    GENCODE format and Salmon i.e. `--pseudo_aligner salmon` is run,
+    this parameter needs to be provided to build the Salmon index appropriately.
+  id: gencode
+  inputBinding:
+    prefix: --gencode
+  label: Gencode GTF
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: By default, the pipeline uses the `gene_name` field to obtain additional gene
+    identifiers from the input GTF file when running Salmon. This behaviour can be
+    modified by specifying `--gtf_extra_attributes` when running the pipeline. Note
+    that also more than one desired value can be specified, separated by a comma e.g.
+    `--gtf_extra_attributes gene_id,....`
+  id: gtf_extra_attributes
+  inputBinding:
+    prefix: --gtf_extra_attributes
+  label: GTF extra attributes
+  sbg:toolDefaultValue: gene_name
+  type:
+  - string
+  - 'null'
+- doc: Define the attribute type used to group features in the GTF file when running
+    Salmon.
+  id: gtf_group_features
+  inputBinding:
+    prefix: --gtf_group_features
+  label: GTF group features
+  sbg:toolDefaultValue: gene_id
+  type:
+  - string
+  - 'null'
+- doc: The attribute type used to group feature types in the GTF file when generating
+    the biotype plot with featureCounts.
+  id: featurecounts_group_type
+  inputBinding:
+    prefix: --featurecounts_group_type
+  label: FeatureCounts group type
+  sbg:toolDefaultValue: gene_biotype
+  type:
+  - string
+  - 'null'
+- doc: The feature type used from the GTF file when generating the biotype plot with featureCounts.
+  id: featurecounts_feature_type
+  inputBinding:
+    prefix: --featurecounts_feature_type
+  label: FeatureCounts feature type
+  sbg:toolDefaultValue: exon
+  type:
+  - string
+  - 'null'
+- doc: Reference files and indices required for the downstream data processing are generated by the pipeline. These files can be saved in the genome/ directory with Save reference parameter and reused in the future pipeline runs, reducing processing times and disk space.
+  id: save_reference
+  inputBinding:
+    prefix: --save_reference
+  label: Save reference
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Do not load `igenomes.config` when running the pipeline. You may choose this
         option if you observe clashes between custom parameters and those supplied
         in `igenomes.config`.
-    id: igenomes_ignore
-    inputBinding:
-        prefix: --igenomes_ignore
-    label: Do not load the iGenomes reference config.
-    sbg:category: Reference genome options
-    sbg:hidden: true
-    sbg:icon: fas fa-ban
-    type:
-    - boolean
-    - 'null'
--   id: trimmer
-    inputBinding:
-        prefix: --trimmer
-    label: Specifies the trimming tool to use - available options are 'trimgalore'
-        and 'fastp'.
-    sbg:category: Read trimming options
-    sbg:icon: fas fa-cut
-    sbg:toolDefaultValue: trimgalore
-    type:
-    -   name: trimmer
+  id: igenomes_ignore
+  inputBinding:
+    prefix: --igenomes_ignore
+  label: iGenomes reference config not loaded
+  sbg:toolDefaultValue: true
+  sbg:category: Reference genome options
+  sbg:hidden: true
+  sbg:icon: fas fa-ban
+  type:
+  - boolean
+  - 'null'
+- doc: Specifies the trimming tool to use - available options are 'trimgalore' and
+    'fastp'.
+  id: trimmer
+  inputBinding:
+    prefix: --trimmer
+  label: Trimming tool
+  sbg:toolDefaultValue: trimgalore
+  type:
+  -   name: trimmer
+      symbols:
+      - trimgalore
+      - fastp
+      type: enum
+  - 'null'
+- doc: Minimum number of trimmed reads below which samples are removed from further
+    processing. Some downstream steps in the pipeline will fail if this threshold
+    is too low.
+  id: min_trimmed_reads
+  inputBinding:
+    prefix: --min_trimmed_reads
+  label: Trimmed reads minimum
+  sbg:toolDefaultValue: 10000
+  type:
+  - int
+  - 'null'
+- doc: This parameter should be used if input FASTQ files have already been trimmed outside of the
+    workflow or if the user is very confident that there is no adapter contamination in data.
+  id: skip_trimming
+  inputBinding:
+    prefix: --skip_trimming
+  label: Skip the adapter trimming step
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: By default, trimmed FASTQ files will not be saved to the results directory.
+    Specify this flag to copy these files to the results directory when complete.
+  id: save_trimmed
+  inputBinding:
+    prefix: --save_trimmed
+  label: Save the trimmed FASTQ files
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Specifies the alignment algorithm to use - available options are 'star_salmon',
+    'star_rsem' and 'hisat2'.
+  id: aligner
+  inputBinding:
+    prefix: --aligner
+  label: Aligner
+  sbg:toolDefaultValue: star_salmon
+  type:
+  -   name: aligner
+      symbols:
+      - star_salmon
+      - star_rsem
+      - hisat2
+      type: enum
+  - 'null'
+- doc: Specifies the pseudo aligner to use - available options are 'salmon'. Runs
+    in addition to '--aligner'.
+  id: pseudo_aligner
+  inputBinding:
+    prefix: --pseudo_aligner
+  label: Pseudo aligner
+  sbg:toolDefaultValue: None
+  type:
+  -   name: pseudoaligner 
+      symbols:
+      - salmon
+      type: enum
+  - 'null'  
+- doc: Create a CSI index for BAM files instead of the traditional BAI index. This
+    will be required for genomes with larger chromosome sizes.
+  id: bam_csi_index
+  inputBinding:
+    prefix: --bam_csi_index
+  label: Create a CSI index
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: When using pre-built STAR indices do not re-extract and use splice junctions
+    from the GTF file.
+  id: star_ignore_sjdbgtf
+  inputBinding:
+    prefix: --star_ignore_sjdbgtf
+  label: Ignore re-mapping of GTF annotations in STAR
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Override Salmon library type inferred based on strandedness defined in meta
+    object. See https://salmon.readthedocs.io/en/latest/library_type.html.
+  id: salmon_quant_libtype
+  inputBinding:
+    prefix: --salmon_quant_libtype
+  label: Salmon quant library type
+  sbg:toolDefaultValue: None
+  type:
+  - string
+  - 'null'
+- doc: Minimum percentage of uniquely mapped reads below which samples are removed
+    from further processing. Some downstream steps in the pipeline will fail if this
+    threshold is too low.
+  id: min_mapped_reads
+  inputBinding:
+    prefix: --min_mapped_reads
+  label: Minimum mapped reads
+  sbg:toolDefaultValue: 5
+  type:
+  - float
+  - 'null'
+- doc: Sequencing center information to be added to read group of BAM files.
+  id: seq_center
+  inputBinding:
+    prefix: --seq_center
+  label: Sequencing center
+  sbg:toolDefaultValue: None
+  type:
+  - string
+  - 'null'
+- doc: Perform reference-guided de novo assembly of transcripts using StringTie i.e.
+    do not restrict to those in GTF file.
+  id: stringtie_ignore_gtf
+  inputBinding:
+    prefix: --stringtie_ignore_gtf
+  label: StringTie in De Novo Mode
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Where possible, save unaligned reads from either STAR, HISAT2 or Salmon to
+    the results directory. This may either be in the form of FASTQ or BAM files depending
+    on the options available for that particular tool.
+  id: save_unaligned
+  inputBinding:
+    prefix: --save_unaligned
+  label: Save unaligned reads
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: By default, intermediate BAM files will not be saved. The final BAM files created
+    after the appropriate filtering step are always saved to limit storage usage.
+    Set this parameter to also save other intermediate BAM files.
+  id: save_align_intermeds
+  inputBinding:
+    prefix: --save_align_intermeds
+  label: Save the intermediate BAM files
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Skip picard MarkDuplicates.
+  id: skip_markduplicates
+  inputBinding:
+    prefix: --skip_markduplicates
+  label: Skip picard MarkDuplicates
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Skip all the alignment-based processes within the pipeline.
+  id: skip_alignment
+  inputBinding:
+    prefix: --skip_alignment
+  label: Skip the alignment step
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Skip all the pseudo-alignment-based processes within the pipeline.
+  id: skip_pseudo_alignment
+  inputBinding:
+    prefix: --skip_pseudo_alignment
+  label: Skip the pseudo-alignment step
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Specify the RSeQC modules to run.
+  id: rseqc_modules
+  inputBinding:
+    itemSeparator: ','
+    prefix: --rseqc_modules
+    shellQuote: false
+  label: RSeQC modules
+  sbg:toolDefaultValue: bam_stat,inner_distance,infer_experiment,junction_annotation,junction_saturation,read_distribution,read_duplication
+  type:
+   - 'null'
+   -   items:
+           name: rseqc_modules
+           symbols:
+           - bam_stat
+           - inner_distance
+           - infer_experiment
+           - junction_annotation
+           - junction_saturation
+           - read_distribution
+           - read_duplication
+           - tin
+           type: enum
+       type: array
+- doc: Use vst transformation instead of rlog with DESeq2. See http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#data-transformations-and-visualization.
+  id: deseq2_vst
+  inputBinding:
+    prefix: --deseq2_vst
+  label: Use vst transformation in DESeq2
+  sbg:toolDefaultValue: True
+  type:
+    -   name: deseq2_vst
         symbols:
-        - trimgalore
-        - fastp
+        - true
+        - false
         type: enum
     - 'null'
--   id: extra_trimgalore_args
-    inputBinding:
-        prefix: --extra_trimgalore_args
-    label: Extra arguments to pass to Trim Galore! command in addition to defaults
-        defined by the pipeline.
-    sbg:category: Read trimming options
-    sbg:icon: fas fa-plus
-    type:
-    - string
-    - 'null'
--   id: extra_fastp_args
-    inputBinding:
-        prefix: --extra_fastp_args
-    label: Extra arguments to pass to fastp command in addition to defaults defined
-        by the pipeline.
-    sbg:category: Read trimming options
-    sbg:icon: fas fa-plus
-    type:
-    - string
-    - 'null'
--   id: min_trimmed_reads
-    inputBinding:
-        prefix: --min_trimmed_reads
-    label: Minimum number of trimmed reads below which samples are removed from further
-        processing. Some downstream steps in the pipeline will fail if this threshold
-        is too low.
-    sbg:category: Read trimming options
-    sbg:icon: fas fa-hand-paper
-    sbg:toolDefaultValue: 10000
-    type:
-    - int
-    - 'null'
--   doc: Use this if your input FastQ files have already been trimmed outside of the
-        workflow or if you're very confident that there is no adapter contamination
-        in your data.
-    id: skip_trimming
-    inputBinding:
-        prefix: --skip_trimming
-    label: Skip the adapter trimming step.
-    sbg:category: Read trimming options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - boolean
-    - 'null'
--   doc: By default, trimmed FastQ files will not be saved to the results directory.
-        Specify this flag (or set to true in your config file) to copy these files
-        to the results directory when complete.
-    id: save_trimmed
-    inputBinding:
-        prefix: --save_trimmed
-    label: Save the trimmed FastQ files in the results directory.
-    sbg:category: Read trimming options
-    sbg:icon: fas fa-save
-    type:
-    - boolean
-    - 'null'
--   id: aligner
-    inputBinding:
-        prefix: --aligner
-    label: Specifies the alignment algorithm to use - available options are 'star_salmon',
-        'star_rsem' and 'hisat2'.
-    sbg:category: Alignment options
-    sbg:icon: fas fa-map-signs
-    sbg:toolDefaultValue: star_salmon
-    type:
-    -   name: aligner
-        symbols:
-        - star_salmon
-        - star_rsem
-        - hisat2
-        type: enum
-    - 'null'
--   id: pseudo_aligner
-    inputBinding:
-        prefix: --pseudo_aligner
-    label: Specifies the pseudo aligner to use - available options are 'salmon'. Runs
-        in addition to '--aligner'.
-    sbg:category: Alignment options
-    sbg:icon: fas fa-hamburger
-    type:
-    -   name: pseudo_aligner
-        symbols:
-        - salmon
-        type: enum
-    - 'null'
--   id: bam_csi_index
-    inputBinding:
-        prefix: --bam_csi_index
-    label: Create a CSI index for BAM files instead of the traditional BAI index.
-        This will be required for genomes with larger chromosome sizes.
-    sbg:category: Alignment options
-    sbg:icon: fas fa-sort-alpha-down
-    type:
-    - boolean
-    - 'null'
--   id: star_ignore_sjdbgtf
-    inputBinding:
-        prefix: --star_ignore_sjdbgtf
-    label: When using pre-built STAR indices do not re-extract and use splice junctions
-        from the GTF file.
-    sbg:category: Alignment options
-    sbg:icon: fas fa-ban
-    type:
-    - boolean
-    - 'null'
--   doc: See [Salmon docs](https://salmon.readthedocs.io/en/latest/library_type.html).
-    id: salmon_quant_libtype
-    inputBinding:
-        prefix: --salmon_quant_libtype
-    label: ' Override Salmon library type inferred based on strandedness defined in
-        meta object.'
-    sbg:category: Alignment options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - string
-    - 'null'
--   doc: Some downstream steps in the pipeline will fail if this threshold is too
-        low.
-    id: min_mapped_reads
-    inputBinding:
-        prefix: --min_mapped_reads
-    label: Minimum percentage of uniquely mapped reads below which samples are removed
-        from further processing.
-    sbg:category: Alignment options
-    sbg:icon: fas fa-percentage
-    sbg:toolDefaultValue: 5.0
-    type:
-    - float
-    - 'null'
--   id: seq_center
-    inputBinding:
-        prefix: --seq_center
-    label: Sequencing center information to be added to read group of BAM files.
-    sbg:category: Alignment options
-    sbg:icon: fas fa-synagogue
-    type:
-    - string
-    - 'null'
--   id: stringtie_ignore_gtf
-    inputBinding:
-        prefix: --stringtie_ignore_gtf
-    label: Perform reference-guided de novo assembly of transcripts using StringTie
-        i.e. dont restrict to those in GTF file.
-    sbg:category: Alignment options
-    sbg:icon: fas fa-ban
-    type:
-    - boolean
-    - 'null'
--   id: extra_star_align_args
-    inputBinding:
-        prefix: --extra_star_align_args
-    label: Extra arguments to pass to STAR alignment command in addition to defaults
-        defined by the pipeline.
-    sbg:category: Alignment options
-    sbg:icon: fas fa-plus
-    type:
-    - string
-    - 'null'
--   id: extra_salmon_quant_args
-    inputBinding:
-        prefix: --extra_salmon_quant_args
-    label: Extra arguments to pass to Salmon quant command in addition to defaults
-        defined by the pipeline.
-    sbg:category: Alignment options
-    sbg:icon: fas fa-plus
-    type:
-    - string
-    - 'null'
--   doc: This may either be in the form of FastQ or BAM files depending on the options
-        available for that particular tool.
-    id: save_unaligned
-    inputBinding:
-        prefix: --save_unaligned
-    label: Where possible, save unaligned reads from either STAR, HISAT2 or Salmon
-        to the results directory.
-    sbg:category: Alignment options
-    sbg:icon: fas fa-save
-    type:
-    - boolean
-    - 'null'
--   doc: By default, intermediate BAM files will not be saved. The final BAM files
-        created after the appropriate filtering step are always saved to limit storage
-        usage. Set this parameter to also save other intermediate BAM files.
-    id: save_align_intermeds
-    inputBinding:
-        prefix: --save_align_intermeds
-    label: Save the intermediate BAM files from the alignment step.
-    sbg:category: Alignment options
-    sbg:icon: fas fa-save
-    type:
-    - boolean
-    - 'null'
--   id: skip_markduplicates
-    inputBinding:
-        prefix: --skip_markduplicates
-    label: Skip picard MarkDuplicates step.
-    sbg:category: Alignment options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - boolean
-    - 'null'
--   id: skip_alignment
-    inputBinding:
-        prefix: --skip_alignment
-    label: Skip all of the alignment-based processes within the pipeline.
-    sbg:category: Alignment options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - boolean
-    - 'null'
--   id: skip_pseudo_alignment
-    inputBinding:
-        prefix: --skip_pseudo_alignment
-    label: Skip all of the pseudo-alignment-based processes within the pipeline.
-    sbg:category: Alignment options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - boolean
-    - 'null'
--   id: rseqc_modules
-    inputBinding:
-        prefix: --rseqc_modules
-    label: Specify the RSeQC modules to run.
-    sbg:category: Process skipping options
-    sbg:icon: fas fa-chart-pie
-    sbg:toolDefaultValue: bam_stat,inner_distance,infer_experiment,junction_annotation,junction_saturation,read_distribution,read_duplication
-    type:
-    - string
-    - 'null'
--   doc: See [DESeq2 docs](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#data-transformations-and-visualization).
-    id: deseq2_vst
-    inputBinding:
-        prefix: --deseq2_vst
-    label: Use vst transformation instead of rlog with DESeq2.
-    sbg:category: Process skipping options
-    sbg:icon: fas fa-dolly
-    sbg:toolDefaultValue: true
-    type:
-    - boolean
-    - 'null'
--   id: skip_bigwig
-    inputBinding:
-        prefix: --skip_bigwig
-    label: Skip bigWig file creation.
-    sbg:category: Process skipping options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - boolean
-    - 'null'
--   id: skip_stringtie
-    inputBinding:
-        prefix: --skip_stringtie
-    label: Skip StringTie.
-    sbg:category: Process skipping options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - boolean
-    - 'null'
--   id: skip_fastqc
-    inputBinding:
-        prefix: --skip_fastqc
-    label: Skip FastQC.
-    sbg:category: Process skipping options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - boolean
-    - 'null'
--   id: skip_preseq
-    inputBinding:
-        prefix: --skip_preseq
-    label: Skip Preseq.
-    sbg:category: Process skipping options
-    sbg:icon: fas fa-fast-forward
-    sbg:toolDefaultValue: true
-    type:
-    - boolean
-    - 'null'
--   id: skip_dupradar
-    inputBinding:
-        prefix: --skip_dupradar
-    label: Skip dupRadar.
-    sbg:category: Process skipping options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - boolean
-    - 'null'
--   id: skip_qualimap
-    inputBinding:
-        prefix: --skip_qualimap
-    label: Skip Qualimap.
-    sbg:category: Process skipping options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - boolean
-    - 'null'
--   id: skip_rseqc
-    inputBinding:
-        prefix: --skip_rseqc
-    label: Skip RSeQC.
-    sbg:category: Process skipping options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - boolean
-    - 'null'
--   id: skip_biotype_qc
-    inputBinding:
-        prefix: --skip_biotype_qc
-    label: Skip additional featureCounts process for biotype QC.
-    sbg:category: Process skipping options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - boolean
-    - 'null'
--   id: skip_deseq2_qc
-    inputBinding:
-        prefix: --skip_deseq2_qc
-    label: Skip DESeq2 PCA and heatmap plotting.
-    sbg:category: Process skipping options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - boolean
-    - 'null'
--   id: skip_multiqc
-    inputBinding:
-        prefix: --skip_multiqc
-    label: Skip MultiQC.
-    sbg:category: Process skipping options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - boolean
-    - 'null'
--   id: skip_qc
-    inputBinding:
-        prefix: --skip_qc
-    label: Skip all QC steps except for MultiQC.
-    sbg:category: Process skipping options
-    sbg:icon: fas fa-fast-forward
-    type:
-    - boolean
-    - 'null'
--   id: custom_config_version
-    inputBinding:
-        prefix: --custom_config_version
-    label: Git commit id for Institutional configs.
-    sbg:category: Institutional config options
-    sbg:hidden: true
-    sbg:icon: fas fa-users-cog
-    sbg:toolDefaultValue: master
-    type:
-    - string
-    - 'null'
--   doc: If you're running offline, Nextflow will not be able to fetch the institutional
-        config files from the internet. If you don't need them, then this is not a
-        problem. If you do need them, you should download the files from the repo
-        and tell Nextflow where to find them with this parameter.
-    id: custom_config_base
-    inputBinding:
-        prefix: --custom_config_base
-    label: Base directory for Institutional configs.
-    sbg:category: Institutional config options
-    sbg:hidden: true
-    sbg:icon: fas fa-users-cog
-    sbg:toolDefaultValue: https://raw.githubusercontent.com/nf-core/configs/master
-    type:
-    - string
-    - 'null'
--   id: config_profile_name
-    inputBinding:
-        prefix: --config_profile_name
-    label: Institutional config name.
-    sbg:category: Institutional config options
-    sbg:hidden: true
-    sbg:icon: fas fa-users-cog
-    type:
-    - string
-    - 'null'
--   id: config_profile_description
-    inputBinding:
-        prefix: --config_profile_description
-    label: Institutional config description.
-    sbg:category: Institutional config options
-    sbg:hidden: true
-    sbg:icon: fas fa-users-cog
-    type:
-    - string
-    - 'null'
--   id: config_profile_contact
-    inputBinding:
-        prefix: --config_profile_contact
-    label: Institutional config contact information.
-    sbg:category: Institutional config options
-    sbg:hidden: true
-    sbg:icon: fas fa-users-cog
-    type:
-    - string
-    - 'null'
--   id: config_profile_url
-    inputBinding:
-        prefix: --config_profile_url
-    label: Institutional config URL link.
-    sbg:category: Institutional config options
-    sbg:hidden: true
-    sbg:icon: fas fa-users-cog
-    type:
-    - string
-    - 'null'
--   doc: 'Warning: The `-profile test` samplesheet file itself contains remote paths.
-        Setting this parameter does not alter the contents of that file.'
-    id: test_data_base
-    inputBinding:
-        prefix: --test_data_base
-    label: Base path / URL for data used in the test profiles
-    sbg:category: Institutional config options
-    sbg:hidden: true
-    sbg:toolDefaultValue: https://raw.githubusercontent.com/nf-core/test-datasets/rnaseq3
-    type:
-    - string
-    - 'null'
--   doc: Use to set an upper-limit for the CPU requirement for each process. Should
-        be an integer e.g. `--max_cpus 1`
-    id: max_cpus
-    inputBinding:
-        prefix: --max_cpus
-    label: Maximum number of CPUs that can be requested for any single job.
-    sbg:category: Max job request options
-    sbg:hidden: true
-    sbg:icon: fas fa-microchip
-    sbg:toolDefaultValue: 16
-    type:
-    - int
-    - 'null'
--   doc: Use to set an upper-limit for the memory requirement for each process. Should
-        be a string in the format integer-unit e.g. `--max_memory '8.GB'`
-    id: max_memory
-    inputBinding:
-        prefix: --max_memory
-    label: Maximum amount of memory that can be requested for any single job.
-    sbg:category: Max job request options
-    sbg:hidden: true
-    sbg:icon: fas fa-memory
-    sbg:pattern: ^\d+(\.\d+)?\.?\s*(K|M|G|T)?B$
-    sbg:toolDefaultValue: 128.GB
-    type:
-    - string
-    - 'null'
--   doc: Use to set an upper-limit for the time requirement for each process. Should
-        be a string in the format integer-unit e.g. `--max_time '2.h'`
-    id: max_time
-    inputBinding:
-        prefix: --max_time
-    label: Maximum amount of time that can be requested for any single job.
-    sbg:category: Max job request options
-    sbg:hidden: true
-    sbg:icon: far fa-clock
-    sbg:pattern: ^(\d+\.?\s*(s|m|h|day)\s*)+$
-    sbg:toolDefaultValue: 240.h
-    type:
-    - string
-    - 'null'
--   id: help
-    inputBinding:
-        prefix: --help
-    label: Display help text.
-    sbg:category: Generic options
-    sbg:hidden: true
-    sbg:icon: fas fa-question-circle
-    type:
-    - boolean
-    - 'null'
--   id: version
-    inputBinding:
-        prefix: --version
-    label: Display version and exit.
-    sbg:category: Generic options
-    sbg:hidden: true
-    sbg:icon: fas fa-question-circle
-    type:
-    - boolean
-    - 'null'
--   doc: The Nextflow `publishDir` option specifies which intermediate files should
-        be saved to the output directory. This option tells the pipeline what method
-        should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir)
-        for details.
-    id: publish_dir_mode
-    inputBinding:
-        prefix: --publish_dir_mode
-    label: Method used to save pipeline results to output directory.
-    sbg:category: Generic options
-    sbg:hidden: true
-    sbg:icon: fas fa-copy
-    sbg:toolDefaultValue: copy
-    type:
-    -   name: publish_dir_mode
-        symbols:
-        - symlink
-        - rellink
-        - link
-        - copy
-        - copyNoFollow
-        - move
-        type: enum
-    - 'null'
--   doc: An email address to send a summary email to when the pipeline is completed
-        - ONLY sent if the pipeline does not exit successfully.
-    id: email_on_fail
-    inputBinding:
-        prefix: --email_on_fail
-    label: Email address for completion summary, only when pipeline fails.
-    sbg:category: Generic options
-    sbg:hidden: true
-    sbg:icon: fas fa-exclamation-triangle
-    sbg:pattern: ^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$
-    type:
-    - string
-    - 'null'
--   id: plaintext_email
-    inputBinding:
-        prefix: --plaintext_email
-    label: Send plain-text email instead of HTML.
-    sbg:category: Generic options
-    sbg:hidden: true
-    sbg:icon: fas fa-remove-format
-    type:
-    - boolean
-    - 'null'
--   id: max_multiqc_email_size
-    inputBinding:
-        prefix: --max_multiqc_email_size
-    label: File size limit when attaching MultiQC reports to summary emails.
-    sbg:category: Generic options
-    sbg:hidden: true
-    sbg:icon: fas fa-file-upload
-    sbg:toolDefaultValue: 25.MB
-    type:
-    - string
-    - 'null'
--   id: monochrome_logs
-    inputBinding:
-        prefix: --monochrome_logs
-    label: Do not use coloured log outputs.
-    sbg:category: Generic options
-    sbg:hidden: true
-    sbg:icon: fas fa-palette
-    type:
-    - boolean
-    - 'null'
--   doc: Incoming hook URL for messaging service. Currently, MS Teams and Slack are
-        supported.
-    id: hook_url
-    inputBinding:
-        prefix: --hook_url
-    label: Incoming hook URL for messaging service
-    sbg:category: Generic options
-    sbg:hidden: true
-    sbg:icon: fas fa-people-group
-    type:
-    - string
-    - 'null'
--   id: multiqc_config
-    inputBinding:
-        prefix: --multiqc_config
-    label: Custom config file to supply to MultiQC.
-    sbg:category: Generic options
-    sbg:hidden: true
-    sbg:icon: fas fa-cog
-    type:
-    - string
-    - 'null'
--   id: multiqc_logo
-    inputBinding:
-        prefix: --multiqc_logo
-    label: Custom logo file to supply to MultiQC. File name must also be set in the
-        MultiQC config file
-    sbg:category: Generic options
-    sbg:hidden: true
-    sbg:icon: fas fa-image
-    type:
-    - string
-    - 'null'
--   id: multiqc_methods_description
-    inputBinding:
-        prefix: --multiqc_methods_description
-    label: Custom MultiQC yaml file containing HTML including a methods description.
-    sbg:category: Generic options
-    sbg:icon: fas fa-cog
-    type:
-    - string
-    - 'null'
--   id: validate_params
-    inputBinding:
-        prefix: --validate_params
-    label: Boolean whether to validate parameters against the schema at runtime
-    sbg:category: Generic options
-    sbg:hidden: true
-    sbg:icon: fas fa-check-square
-    sbg:toolDefaultValue: true
-    type:
-    - boolean
-    - 'null'
--   doc: By default, parameters set as _hidden_ in the schema are not shown on the
-        command line when a user runs with `--help`. Specifying this option will tell
-        the pipeline to show all parameters.
-    id: show_hidden_params
-    inputBinding:
-        prefix: --show_hidden_params
-    label: Show all params when using `--help`
-    sbg:category: Generic options
-    sbg:hidden: true
-    sbg:icon: far fa-eye-slash
-    type:
-    - boolean
-    - 'null'
+- doc: Skip bigWig file creation.
+  id: skip_bigwig
+  inputBinding:
+    prefix: --skip_bigwig
+  label: Skip bigWig
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Skip StringTie.
+  id: skip_stringtie
+  inputBinding:
+    prefix: --skip_stringtie
+  label: Skip StringTie
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Skip FastQC.
+  id: skip_fastqc
+  inputBinding:
+    prefix: --skip_fastqc
+  label: Skip FastQC
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Skip Preseq.
+  id: skip_preseq
+  inputBinding:
+    prefix: --skip_preseq
+  label: Skip Preseq
+  sbg:toolDefaultValue: True
+  type:
+  -   name: skip_preseq
+      symbols:
+      - true
+      - false
+      type: enum
+  - 'null'
+- doc: Skip dupRadar.
+  id: skip_dupradar
+  inputBinding:
+    prefix: --skip_dupradar
+  label: Skip dupRadar
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Skip Qualimap.
+  id: skip_qualimap
+  inputBinding:
+    prefix: --skip_qualimap
+  label: Skip Qualimap
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Skip RSeQC.
+  id: skip_rseqc
+  inputBinding:
+    prefix: --skip_rseqc
+  label: Skip RSeQC
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Skip additional featureCounts process for biotype QC.
+  id: skip_biotype_qc
+  inputBinding:
+    prefix: --skip_biotype_qc
+  label: Skip biotype QC
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Skip DESeq2 PCA and heatmap plotting.
+  id: skip_deseq2_qc
+  inputBinding:
+    prefix: --skip_deseq2_qc
+  label: Skip DESeq2 QC
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Skip MultiQC.
+  id: skip_multiqc
+  inputBinding:
+    prefix: --skip_multiqc
+  label: Skip MultiQC
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Skip all QC steps except for MultiQC.
+  id: skip_qc
+  inputBinding:
+    prefix: --skip_qc
+  label: Skip QC steps
+  sbg:toolDefaultValue: False
+  type:
+  - boolean
+  - 'null'
+- doc: Maximum number of CPUs that can be requested for any single job. Use to set
+    an upper-limit for the CPU requirement for each process. Should be an integer
+    e.g. `--max_cpus 1`.
+  id: max_cpus
+  inputBinding:
+    prefix: --max_cpus
+  label: Maximum number of CPUs
+  sbg:toolDefaultValue: 16
+  type:
+  - int
+  - 'null'
+- doc: Maximum amount of memory that can be requested for any single job. Use to
+    set an upper-limit for the memory requirement for each process. Should be a string
+    in the format integer-unit e.g. `--max_memory '8.GB'`.
+  id: max_memory
+  inputBinding:
+    prefix: --max_memory
+  label: Maximum amount of memory
+  sbg:toolDefaultValue: 128.GB
+  type:
+  - string
+  - 'null'
+- doc: Maximum amount of time that can be requested for any single job. Use to set
+    an upper-limit for the time requirement for each process. Should be a string in
+    the format integer-unit e.g. `--max_time '2.h'`.
+  id: max_time
+  inputBinding:
+    prefix: --max_time
+  label: Maximum amount of time
+  sbg:toolDefaultValue: 240.h
+  type:
+  - string
+  - 'null'
 outputs:
 -   doc: Output directory.
     id: output_dir
     label: Output directory
     outputBinding:
         glob: $(inputs.outdir)
-    type: Directory?
+    type: Directory
+-   doc: MultiQC HTML report.
+    id: multiqc_report
+    label: MultiQC HTML report
+    outputBinding:
+        glob: "**/multiqc/**/multiqc_report.html"
+    type: File
+-   doc: File containing PCA and hierarchical clustering plots for star_salmon alignment option.
+    id: deseq2_plot_star_salmon
+    label: Star-salmon Deseq2 plots
+    outputBinding:
+        glob: "**/star_salmon/**/deseq2.plots.pdf"
+    type: File
+-   doc: Matrix of gene-level raw counts across all samples for star_salmon alignment option.
+    id: merged_counts_star_salmon
+    label: Star-salmon merged counts 
+    outputBinding:
+        glob: "**/star_salmon/salmon.merged.gene_counts.tsv"
+    type: File
+-   doc: Matrix of gene-level TPM values across all samples for star_salmon alignment option.
+    id: tpm_values_star_salmon
+    label: Star-salmon TPM values 
+    outputBinding:
+        glob: "**/star_salmon/salmon.merged.gene_tpm.tsv"
+    type: File
+-   doc: Matrix of isoform-level raw counts across all samples for star_salmon alignment option.
+    id: isoform_raw_counts_star_salmon
+    label: Star-salmon isoform raw counts 
+    outputBinding:
+        glob: "**/star_salmon/salmon.merged.transcript_counts.tsv"
+    type: File
+-   doc: Matrix of isoform-level TPM values across all samples for star_salmon alignment option.
+    id: isoform_tpm_values_star_salmon
+    label: Star-salmon isoform TPM values 
+    outputBinding:
+        glob: "**/star_salmon/salmon.merged.transcript_tpm.tsv"
+    type: File
+-   doc: File containing PCA and hierarchical clustering plots for salmon pseudo-alignment option.
+    id: deseq2_plot_salmon
+    label: Salmon Deseq2 plots
+    outputBinding:
+        glob: "**/salmon/**/deseq2.plots.pdf"
+    type: File
+-   doc: Matrix of gene-level raw counts across all samples for salmon pseudo-alignment option.
+    id: merged_counts_salmon
+    label: Salmon merged counts 
+    outputBinding:
+        glob: "**/salmon/salmon.merged.gene_counts.tsv"
+    type: File
+-   doc: Matrix of gene-level TPM values across all samples for salmon pseudo-alignment option.
+    id: tpm_values_salmon
+    label: Salmon TPM values 
+    outputBinding:
+        glob: "**/salmon/salmon.merged.gene_tpm.tsv"
+    type: File
+-   doc: Matrix of isoform-level raw counts across all samples for salmon pseudo-alignment option.
+    id: isoform_raw_counts_salmon
+    label: Salmon isoform raw counts 
+    outputBinding:
+        glob: "**/salmon/salmon.merged.transcript_counts.tsv"
+    type: File
+-   doc: Matrix of isoform-level TPM values across all samples for salmon pseudo-alignment option.
+    id: isoform_tpm_values_salmon
+    label: Salmon isoform TPM values 
+    outputBinding:
+        glob: "**/salmon/salmon.merged.transcript_tpm.tsv"
+    type: File
+-   doc: File containing PCA and hierarchical clustering plots for star_rsem alignment option.
+    id: deseq2_plot_star_rsem
+    label: Star-rsem Deseq2 plots
+    outputBinding:
+        glob: "**/star_rsem/**/deseq2.plots.pdf"
+    type: File
+-   doc: Matrix of gene-level raw counts across all samples for star_rsem alignment option.
+    id: merged_counts_star_rsem
+    label: Star-rsem merged counts 
+    outputBinding:
+        glob: "**/star_rsem/rsem.merged.gene_counts.tsv"
+    type: File
+-   doc: Matrix of gene-level TPM values across all samples for star_rsem alignment option.
+    id: tpm_values_star_rsem
+    label: Star-rsem TPM values 
+    outputBinding:
+        glob: "**/star_rsem/rsem.merged.gene_tpm.tsv"
+    type: File
+-   doc: Matrix of isoform-level raw counts across all samples for star_rsem alignment option.
+    id: isoform_raw_counts_star_rsem
+    label: Star-rsem isoform raw counts 
+    outputBinding:
+        glob: "**/star_rsem/rsem.merged.transcript_counts.tsv"
+    type: File
+-   doc: Matrix of isoform-level TPM values across all samples for star_rsem alignment option.
+    id: isoform_tpm_values_star_rsem
+    label: Star-rsem isoform TPM values 
+    outputBinding:
+        glob: "**/star_rsem/rsem.merged.transcript_tpm.tsv"
+    type: File
 requirements:
 -   class: InlineJavascriptRequirement
 -   class: InitialWorkDirRequirement
-    listing:
-    - entry: "${\n    if (inputs.in_ribo_databases){\n       var ribo_databases = [].concat(inputs.in_ribo_databases)\n       var rrna_manifest = ''\n       for (var i = 0; i < reads.length; i++) {\n           rrna_manifest = rrna_manifest.concat(ribo_databases[i].path, '\\n' )\n       }\n    }\n    return rrna_manifest\n}"
-      entryname: rrna_manifest.txt
-      writable: false
-    - entry: "${\n    if (inputs.in_reference_genomes_bbsplit){\n       var bbsplit_reference_genomes = [].concat(inputs.in_reference_genomes_bbsplit)\n       var bbsplit_fasta_list = ''\n       for (var i = 0; i < bbsplit_reference_genomes.length; i++) {\n           bbsplit_fasta_list = bbsplit_fasta_list.concat(bbsplit_reference_genomes[i].metadata.reference_genome, \",\", bbsplit_reference_genomes[i].path, '\\n' )\n       }\n    }\n    return bbsplit_fasta_list\n}"
-      entryname: reference_genomes_bbsplit.txt
-      writable: false
