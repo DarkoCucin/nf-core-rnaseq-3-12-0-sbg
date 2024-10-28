@@ -10,8 +10,8 @@ Related to this, our team decided to optimize this pipeline for the execution on
 
 The nextflow pipelines can be delivered to SevenBridges platform in a two ways:
 
-* Via command line interface (CLI) by using **sbpack** package
-* Via platform general user interface (GUI)
+* Via command line interface (CLI) by using **sbpack** package.
+* Via platform general user interface (GUI) - If you want to use this method refer to Seven Bridges documentation[https://docs.sevenbridges.com/docs/add-nextflow-apps-through-the-visual-interface].
 
 
 ### CLI for deploying Nextflow pipelines onto the platform
@@ -40,23 +40,18 @@ If you want to put this pipeline onto platform you should do the following:
        * ```multi-instance``` - the mode which uses more instances for one task. Implemented in the latest **Nextflow** implementation on the platform.
   * ```--sb-schema``` - parameter which specifies a path to an existing ```sb_nextflow_schema``` file in JSON or YAML format. In this case we provided  ```sb_nextflow_schema.yaml``` file for you. If you want to make ```sb_nextflow_schema```from scratch refer to this [put the link later]()
 
-### GUI for deploying Nextflow pipelines onto the platform
-
-LATER 
-
-
 
 ### Running nf-core/rnaseq on the platform
 
 When you put **nf-core/rnaseq** pipeline onto the platform it is time to run this pipeline. This pipeline has the following required inputs (if ```test``` or ```test_full``` profile option is not used):
 
-1. **Samplesheet file** (```--input```) - This is file which specifies read files needed for running pipeline. If you want to learn more about specifying this file refer to [nf-core/rnaseq platform documentation - PUT THE LINK OF THE PUBLIC APPS GALLERY]()
+1. **Samplesheet file** (```--input```) - This is file which specifies read files needed for running pipeline. If you want to learn more about specifying this file refer to [nf-core/rnaseq documentation](https://nf-co.re/rnaseq/3.12.0/docs/usage/#samplesheet-input).
 2. If **Igenomes** (```--genome```) parameter is not specified the following input files are required:
    * **FASTA genome file** (```--fasta```) - Fasta file with specified genome.
-   * **Genome annotation file**(```--gtf```) - Annotation file for the corresponding genome
+   * Annotation file - a gene annotation file in GTF or GFF3 format (`--gtf` or `--gff`)  corresponding to the **Genome FASTA** (`--fasta`) file.
 3. **Output directory** (```--outdir```) - Specify the name of output directory where the pipeline results will be stored
 
 As we mentioned above this pipeline is optimized to run on the Seven Bridges platform. In the ```Profiles``` input you can use the following profiles to optimize exectuon:
 
-1. ```sbg_full``` - This is configuration which is tailored to run pipeline efficiently with the ```test_full``` and similar datasets. The suggested number of parallel instances which is 10.
-2. ```sbg_large_number_samples``` - This configuration is made to run pipeline efficiently with the larger number of samples. It is optimized with the dataset which consists of 78 paired-end samples with the average size of 4.5GB per sample. The suggested number of parallel instances which is variable but we advise you to increase this number by one on every 10th sample.
+1. ```sbg_full``` - This configuration is tailored to run pipeline efficiently with the ```test_full``` and similar datasets. The suggested number of parallel instances  is 10.
+2. ```sbg_large_number_samples``` - This configuration is made to run pipeline efficiently with the larger number of samples. It is optimized with the dataset which consists of 78 paired-end samples with the average size of 4.5GB per sample. The suggested number of parallel instances is variable but it is advisable to increase this number by one on every 10th sample.
